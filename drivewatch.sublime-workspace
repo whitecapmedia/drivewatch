@@ -1,0 +1,725 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"get",
+				"getFileById"
+			],
+			[
+				"DRI",
+				"DRIVEWATCH_LOG_NAME"
+			],
+			[
+				"list",
+				"listActivity"
+			],
+			[
+				"deploy",
+				"deployGAS"
+			],
+			[
+				"event",
+				"eventType"
+			],
+			[
+				"GOOGL",
+				"GOOGLE_DOCS"
+			],
+			[
+				"m",
+				"mimeType"
+			],
+			[
+				"eventT",
+				"eventTimeMillis"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "package.json",
+			"settings":
+			{
+				"buffer_size": 0,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "/**\n * Prepares the Google Apps Script to run as a web app\n * @param {object} e The event object https://developers.google.com/apps-script/guides/triggers/events\n *\n */\n\nfunction doGet(e) {\n	Logger.log(\"DO GET\");\n}\n",
+			"file": "src/GAS/events.js",
+			"file_size": 0,
+			"file_write_time": 131339074224288489,
+			"settings":
+			{
+				"buffer_size": 215,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "var exec = require('child_process').exec;\nvar gulp = require('gulp');\n\ngulp.task('deploy', deployGAS);\ngulp.task('test-web', ['build-web'], openWeb);\n\n\n\n\n/**\n * Opens up the project in Google Chrome.\n * Calls browserifyBundle, then buildWeb.\n *\n * @return {stream} the stream as the completion hint to the gulp engine\n */\nfunction openWeb() {\n    var browser = os.platform() === 'win32' ? 'chrome' : (\n        os.platform() === 'linux' ? 'google-chrome' : (\n            os.platform() === 'darwin' ? 'google chrome' : 'firefox'));\n\n    return gulp.src('./build/web/client/html/mailman.html')\n        .pipe(open({\n            app: browser\n        }));\n}\n\n/**\n * Deploys the GAS code up to the project.\n * Calls browserifyBundle, then buildGAS.\n *\n * @param  {callback} cb - a callback so the engine knows when it'll be done\n * @return {stream} the stream as the completion hint to the gulp engine\n */\nfunction deployGAS(cb) {\n    return exec('gapps push', function(err, stdout, stderr) {\n        console.log(stdout);\n        console.log(stderr);\n        cb(err);\n    });\n}",
+			"file": "gulpfile.js",
+			"file_size": 543,
+			"file_write_time": 131336397245274379,
+			"settings":
+			{
+				"buffer_size": 1070,
+				"line_ending": "Windows",
+				"name": "/**"
+			}
+		},
+		{
+			"contents": "{\n  \"path\": \"src/GAS\",\n  \"fileId\": \"1pyzvJIwiwPLkuTV8Rek5gwVHYRtHNo8EoL2HpKhRw5MBLx7ROsZgnxy7\"\n}",
+			"file": "gapps.config.json",
+			"file_size": 99,
+			"file_write_time": 131336394109934379,
+			"settings":
+			{
+				"buffer_size": 96,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "var SettingsService = {\n	DRIVEWATCH_LOG_NAME: 'drivewatch_log',\n	SS_KEY: 'DRIVEWATCH_LOG_URL'\n\n	/** \n	 * Turns on Logging and creates a log at the root of the user's drive.\n	 *\n	 * @return {string} The URL of the newly created log sheet.\n	 */\n\n	 turnOnLogging: function() {\n	 	var ss = SpreadsheetApp.create(SettingsService.DRIVEWATCH_LOG_NAME);\n\n	 	// The log file needs to be editable by anyone that could use DriveWatch.\n	 	// Ideally, this log is temporarily.\n	 	var file = DriveApp.getFileById(ss.getId());\n	 	file.setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.EDIT);\n\n	 	var url = ss.getUrl();\n\n	 	var prop = PropertiesService.getDocumentProperties();\n	 	prop.setProperty(SettingsService.SS_KEY, url);\n\n	 	return url;\n	 }\n\n	 /** \n	  * Turns off logging and deletes the log sheet.\n	  *\n	  */\n	  turnOffLogging: function() {\n	  	var url = SettingsService.getLogUrl();\n	  	if (url == null) { return; }\n\n	  	// Delete the property stored in the PropertiesService.\n	  	PropertiesService.getDocumentProperties().deleteProperty(SettingsService.SS_KEY);\n\n	  	var ss = SpreadsheetApp.openByUrl(url);\n	  	var id = ss.getId();\n	  	var file = DriveApp.getFileById(id);\n	  	file.setTrashed(true);\n	  }\n\n	  /**\n	   * Gets the URL of the log file or null if there isn't one.\n	   * @return {string} The log URL of the log file.\n	   */\n	   getLogUrl: function() {\n	   	var prop = PropertiesService.getDocumentProperties();\n	   	return prop.getProperty(SettingsService.SS_KEY);\n	   }\n\n\n}",
+			"file": "src/GAS/services/settings-service.js",
+			"file_size": 0,
+			"file_write_time": 131339076324678507,
+			"settings":
+			{
+				"buffer_size": 1484,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/GAS/global-variables.js",
+			"settings":
+			{
+				"buffer_size": 0,
+				"line_ending": "Windows",
+				"name": "var PROPERTY_SS_ID = 'SPREADSHEET_ID';"
+			}
+		},
+		{
+			"contents": "",
+			"settings":
+			{
+				"buffer_size": 0,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "function doGet(e) {\n	return HtmlService.createHtmlOutputFromFile('index');\n}\n\nfunction onOpen(e) {\n	//listActivity();\n  Logger.log(\"onOpen called\");\n  \n}\n\nfunction listActivity() {\n  var optionalArgs = {\n    source: 'drive.google.com',\n    'drive.ancestorId': 'root',\n    pageSize: 10\n  };\n  var response = AppsActivity.Activities.list(optionalArgs);\n  var activities = response.activities;\n  if (activities && activities.length > 0) {\n    Logger.log('Recent activity:');\n    for (i = 0; i < activities.length; i++) {\n      var activity = activities[i];\n      var event = activity.combinedEvent;\n      var user = event.user;\n      var target = event.target;\n      if (user == null || target == null) {\n        continue;\n      } else {\n        var time = new Date(Number(event.eventTimeMillis));\n        Logger.log('%s: %s, %s, %s (%s)', time, user.name,\n              event.primaryEventType, target.name, target.mimeType);\n      }\n    }\n  } else {\n    Logger.log('No recent activity');\n  }\n}",
+			"file": "src/server/Code.js",
+			"file_size": 978,
+			"file_write_time": 131339882603900457,
+			"settings":
+			{
+				"buffer_size": 991,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "Package Control Messages\n========================\n\nGlue\n----\n\n          __\n   .-----|  .--.--.-----.\n   |  _  |  |  |  |  -__|\n   |___  |__|_____|_____|\n   |_____|\n  \n  Copyright 2014 Christopher Simpkins | MIT License\n  \n  Glue joins your shell to Sublime Text in quasi-perfect harmony.\n  \n  \n  POST-INSTALL TASKS\n  \n  Important! Please take a couple of minutes to read and follow these post-install instructions in order to get up and running without a hitch.\n  \n  \n  Confirm Your PATH Settings\n  --------------------------\n  \n  Please make sure that your PATH settings are correct.  Glue will attempt to use your environment's PATH variable as the default PATH string. In most cases it nails it, but occasionally the PATH string requires a bit of tinkering.\n  \n  Open Glue with the right click menu in a project sidebar or with the Command Palette (type 'glue') and run the command `glue path` in the input panel that is displayed at the bottom of your editor.  The PATH that Glue will use by default is displayed in the editor view.  If this is not the correct PATH string, please follow the instructions below to set your PATH in the Glue settings file.\n  \n  Linux/Unix (including Mac OSX) Users\n  \n  1. Open the `Glue Settings - User` file and add a \"glue_userpath\" key to the JSON file.  Enter your system colon delimited PATH string as the value for this setting. You can view your PATH string by entering 'echo $PATH' in your terminal.  Save the file.\n  2. Restart Sublime Text\n  \n  Windows Users\n  \n  1. Open the `Glue Settings - User` file and add a `glue_userpath` key to the JSON file.  Enter your semicolon delimited system PATH string as the value for this setting. Windows users should escape every backslash character in the PATH (i.e. every '\\' should be changed to '\\\\'). You can view your PATH string by entering 'ECHO %PATH%' in your cmd.exe terminal.  Save the file.\n  2. Restart Sublime Text\n  \n  \n  Choose Your Shell\n  -----------------\n  This is an optional step.  If you would like to change your default shell, here's how you do it:\n  \n  Linux/Unix/Windows\n  \n  1. Open the `Glue Settings - User` file and add a \"glue_shellpath\" key to the JSON file.  Enter the path to your shell executable as the value for this setting.  Windows users should escape every backslash character in the PATH (i.e. every '\\' should be changed to '\\\\').  Save the file.\n  2. Restart Sublime Text\n  \n  \n  Once this is complete, you are all set... Check out the instructions below to learn more about how to use Glue in Sublime Text.\n  \n  See the Install documentation at http://gluedocs.readthedocs.org/en/latest/install.html if you need a more detailed description of the install process.\n  \n  Detailed help documentation is available at http://gluedocs.readthedocs.org\n  \n  \n  USAGE\n  \n    <command> [option(s)]\n  \n    Enter a system command in the input panel at the bottom of your editor using the same syntax that you use in your terminal.  The standard output stream from the executable is printed in the active view of your editor after it returns.\n  \n    To quit Glue, submit the command 'exit'.\n  \n  \n  COMMANDS\n  \n    Glue provides the following additional commands:\n  \n      glue browse <url,path>    Open default browser to <url> or local <path>\n      glue clear                Clear the text in the Glue view\n      glue finder [path]        Reveal current directory (default) or [path] directory in finder\n      glue goto <query>         Sublime Text Goto Anything search for <query>\n      glue help                 Glue help\n      glue localhost [port]     Open browser to localhost:8000 or optional localhost:[port]\n      glue new                  Create a new Sublime Text buffer\n      glue open <path>          Open a file at <path> in the editor. Accepts multiple <path>\n      glue path                 View your PATH settings\n      glue user                 View your Glue extensions (if present)\n      glue wco <pattern>        Open file(s) with wildcard <pattern> in the editor\n  \n  \n  USER COMMANDS\n  \n    Create a `Glue-Commands` directory inside your Sublime Text `Packages` directory.  Create a `glue.json` file inside the `Glue-Commands` directory.  Then map your JSON key:value as \"command-name\": \"system command string\".\n  \n    You have the option to include the following replacement tags in your system command string:\n  \n      {{args}}              additional arguments that you include on the command line\n      {{clipboard}}         the contents of the clipboard\n      {{pwd}}               the current working directory path\n  \n    Launch Glue and run your command extension(s) with the following syntax:\n  \n       glue <command-name> [args]\n  \n    Your command is executed from your current working directory. Please see the documentation for additional details.\n  \n  \n  NAVIGATION\n  \n    The working directory is initially set to the directory containing the buffer in which you are using Glue (when you open from sidebar right click menu or with a project file open in the editor).\n  \n    Change directories with the 'cd' command:\n  \n    cd <directory path>        Make `directory path` the working directory\n    cd ..                      Make parent directory the working directory\n    cd ~                       Make user home directory the working directory\n  \n    Note that your working directory defaults to the system User directory if you launch Glue from the Command Palette without having an open project file in the editor (or in a clean editor window without an open project).\n  \n  \n  ISSUES\n  \n    Please submit bug reports on the GitHub repository @ https://github.com/chrissimpkins/glue/issues\n",
+			"settings":
+			{
+				"buffer_size": 5652,
+				"line_ending": "Windows",
+				"name": "Package Control Messages",
+				"read_only": true,
+				"scratch": true
+			}
+		},
+		{
+			"file": "terminal.glue",
+			"settings":
+			{
+				"buffer_size": 0,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/nicjoh/Downloads/client_secret_85944772490-ao25oddc0olmu7k5ofh6mqskkmjl5f4b.apps.googleusercontent.com.json",
+			"settings":
+			{
+				"buffer_size": 442,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/nicjoh/AppData/Roaming/npm/gapps",
+			"settings":
+			{
+				"buffer_size": 357,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "<!DOCTYPE html>\n<html>\n  <head>\n    <title>DriveWatch</title>\n    <meta charset='utf-8' />\n    <!-- Latest compiled and minified CSS -->\n    <link rel=\"stylesheet\" href=\"/css/bootstrap.min.css\" integrity=\"sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u\" crossorigin=\"anonymous\">\n    <!-- Optional theme -->\n    <link rel=\"stylesheet\" href=\"/css/bootstrap-theme.min.css\" integrity=\"sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp\" crossorigin=\"anonymous\">\n  </head>\n  <body>\n    <p>DriveWatch</p>\n\n    <!--Add buttons to initiate auth sequence and sign out-->\n    <button id=\"authorize-button\" style=\"display: none;\">Authorize</button>\n    <button id=\"signout-button\" style=\"display: none;\">Sign Out</button>\n\n    <div class=\"container\">\n      <div id=\"activity_container\">\n        <div class=\"col-xs-2\">\n \n        </div>\n      </div>\n    </div>\n\n    <pre id=\"content\"></pre>\n\n    <script type=\"text/javascript\" src=\"js/init.js\"></script>\n    <script type=\"text/javascript\" src=\"js/activity.js\"></script\n>\n    <script async defer src=\"https://apis.google.com/js/api.js\"\n      onload=\"this.onload=function(){};handleClientLoad()\"\n      onreadystatechange=\"if (this.readyState === 'complete') this.onload()\">\n    </script>\n    \n    <!-- Latest compiled and minified JavaScript -->\n    <script src=\"/js/jquery-3.1.1.min.js\"></script>\n\n    <!-- Latest compiled and minified JavaScript -->\n    <script src=\"/js/bootstrap.min.js\" integrity=\"sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa\" crossorigin=\"anonymous\"></script>\n    \n  </body>\n</html>",
+			"file": "src/client/index.html",
+			"file_size": 1660,
+			"file_write_time": 131338954719251137,
+			"settings":
+			{
+				"buffer_size": 1611,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 110.0,
+		"selected_items":
+		[
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"Install ",
+				"Package Control: Install Package"
+			],
+			[
+				"Goo",
+				"Google Apps Scripts: Browse projects"
+			],
+			[
+				"install package ",
+				"Package Control: Install Package"
+			],
+			[
+				"goog",
+				"Google Apps Scripts: Browse projects"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"google ",
+				"Google Apps Scripts: Authenticate"
+			],
+			[
+				"Install",
+				"Package Control: Install Package"
+			],
+			[
+				"pack",
+				"Preferences: Browse Packages"
+			]
+		],
+		"width": 402.0
+	},
+	"console":
+	{
+		"height": 125.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Users/nicjoh/AppData/Roaming/Sublime Text 2/Packages/User/Default (Windows).sublime-keymap"
+	],
+	"find":
+	{
+		"height": 34.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 11,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "package.json",
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/JavaScript/JSON.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "src/GAS/events.js",
+					"settings":
+					{
+						"buffer_size": 215,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								212,
+								212
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "gulpfile.js",
+					"settings":
+					{
+						"buffer_size": 1070,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								651,
+								651
+							]
+						],
+						"settings":
+						{
+							"auto_name": "/**",
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "gapps.config.json",
+					"settings":
+					{
+						"buffer_size": 96,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								96,
+								96
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/JavaScript/JSON.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/GAS/services/settings-service.js",
+					"settings":
+					{
+						"buffer_size": 1484,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								452,
+								452
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "src/GAS/global-variables.js",
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"auto_name": "var PROPERTY_SS_ID = 'SPREADSHEET_ID';",
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"auto_name": "",
+							"default_dir": "C:\\Users\\nicjoh\\Desktop\\DriveWatch\\src\\GAS",
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "src/server/Code.js",
+					"settings":
+					{
+						"buffer_size": 991,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								151,
+								151
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"settings":
+					{
+						"buffer_size": 5652,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5652,
+								5652
+							]
+						],
+						"settings":
+						{
+							"auto_indent": false,
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_size": 2,
+							"tab_width": 2,
+							"translate_tabs_to_spaces": true,
+							"word_wrap": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "terminal.glue",
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "/C/Users/nicjoh/Downloads/client_secret_85944772490-ao25oddc0olmu7k5ofh6mqskkmjl5f4b.apps.googleusercontent.com.json",
+					"settings":
+					{
+						"buffer_size": 442,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								442,
+								442
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/JavaScript/JSON.tmLanguage"
+						},
+						"translation.x": 2194.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "/C/Users/nicjoh/AppData/Roaming/npm/gapps",
+					"settings":
+					{
+						"buffer_size": 357,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/ShellScript/Shell-Unix-Generic.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 12,
+					"file": "src/client/index.html",
+					"settings":
+					{
+						"buffer_size": 1611,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								853,
+								853
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 120.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.sftp":
+	{
+		"height": 0.0
+	},
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 205.0,
+	"status_bar_visible": true
+}
